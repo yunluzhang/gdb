@@ -68,8 +68,7 @@
 #define AUX_LAST_REGNUM       2111
 
 
-static ARC_RegisterMappingFunction       map     = 0;
-static ARC_AuxRegisterConversionFunction convert = 0;
+static ARC_RegisterMappingFunction map = 0;
 
 
 /* -------------------------------------------------------------------------- */
@@ -127,23 +126,10 @@ void arc_hw_register_mapping(int                gdb_regno,
 }
 
 
-void arc_aux_register_conversion(int gdb_regno, void *buffer)
-{
-    if (convert != 0)
-        convert(gdb_regno, buffer);
-}
-
-
 /* this function allows the debugger to provide a mapping */
 void arc_set_register_mapping(ARC_RegisterMappingFunction function)
 {
     map = function;
-}
-
-
-void arc_set_aux_register_conversion(ARC_AuxRegisterConversionFunction function)
-{
-    convert = function;
 }
 
 /******************************************************************************/

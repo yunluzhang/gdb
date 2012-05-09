@@ -1,6 +1,6 @@
 /* Interface between the opcode library and its callers.
 
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -283,7 +283,7 @@ extern int print_insn_z80		(bfd_vma, disassemble_info *);
 extern int print_insn_z8001		(bfd_vma, disassemble_info *);
 extern int print_insn_z8002		(bfd_vma, disassemble_info *);
 
-extern disassembler_ftype arc_get_disassembler (void *);
+extern disassembler_ftype arc_get_disassembler (bfd *); /* ARC LOCAL */
 extern disassembler_ftype cris_get_disassembler (bfd *);
 
 extern void print_i386_disassembler_options (FILE *);

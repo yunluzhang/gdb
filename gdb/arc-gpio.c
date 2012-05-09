@@ -1,6 +1,6 @@
 /* Target dependent code for ARC processor family, for GDB, the GNU debugger.
 
-   Copyright 2005, 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2009 Free Software Foundation, Inc.
 
    Contributed by ARC International (www.arc.com)
 
@@ -12,16 +12,18 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-
+    
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+    
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/  
 
 /******************************************************************************/
 /*                                                                            */
@@ -48,7 +50,7 @@
 /*                               local data                                   */
 /* -------------------------------------------------------------------------- */
 
-// I/O control numbers.
+// I/O control numbers
 
 // Linux kernel uses 0x54XX for special purposes.  Avoid such.
 // We'll pick large numbers.
@@ -100,32 +102,31 @@ typedef struct
 
     // inlen is replaced by the number of input bytes consumed.
     unsigned inlen;
-    char    *inbuf;
+    char*    inbuf;
 
     // outlen is replaced by the number of output bytes written.
     unsigned outlen;
-    char    *outbuf;
+    char*    outbuf;
 } GPIO_ioctl;
 
 
-/* Buffers to hold data read from / written to ports; we generally read/write
-   only 1 byte of data at a time, so the buffers need hold only 1 byte pair each.  */
+/* buffers to hold data read from / written to ports; we generally read/write
+ * only 1 byte of data at a time, so the buffers need hold only 1 byte pair each
+ */
 static char       input_buffer [2];
 static char       output_buffer[2];
 static GPIO_ioctl ioctl_data  = { 0, input_buffer, 0, output_buffer };
-
-/* A file descriptor for the GPIO driver.  */
 static int        gpio_driver = NULL_FILE_DESCRIPTOR;
 
-/* Debug data.  */
-// static const char name[] = {'D', 'S', 'C'};
+#ifdef DEBUG
+static const char name[] = {'D', 'S', 'C'};
+#endif
 
 
 /* -------------------------------------------------------------------------- */
 /*                               externally visible data                      */
 /* -------------------------------------------------------------------------- */
 
-/* This is set to TRUE if an I/O error occurs in accessing the port.  */
 Boolean gpio_port_error;
 
 
@@ -133,12 +134,9 @@ Boolean gpio_port_error;
 /*                               externally visible functions                 */
 /* -------------------------------------------------------------------------- */
 
-/* Initialization of the GPIO interface.  */
-
-Boolean
-gpio_open (void)
+/* initializations for GPIO interface */
+Boolean gpio_open(void)
 {
-    /* Open the driver, if not already open.  */
     if (gpio_driver == NULL_FILE_DESCRIPTOR)
     {
         gpio_driver = open(GPIO_DEVICE, O_RDWR);
@@ -159,15 +157,11 @@ gpio_open (void)
 }
 
 
-/* Close the GPIO interface.  */
-
-void
-gpio_close (void)
+void gpio_close(void)
 {
-    /* Close the driver, if not already closed.  */
     if (gpio_driver != NULL_FILE_DESCRIPTOR)
     {
-        /* Close file descriptor opened for communication with gpio driver.  */
+        /* close file descriptor opened for communication with gpio driver */
         if (close(gpio_driver) == -1)
             warning(_("unable to close JTAG port (device " GPIO_DEVICE "): %s"),
                     strerror(errno));
@@ -177,10 +171,8 @@ gpio_close (void)
 }
 
 
-/* Write a byte of data to the given port.  */
-
-void
-gpio_write (ParallelPort port, Byte data)
+/* write a byte of data to the given port */
+void gpio_write(ParallelPort port, Byte data)
 {
     ioctl_data.inlen    = 2;
     ioctl_data.inbuf[0] = (char) port;
@@ -189,7 +181,7 @@ gpio_write (ParallelPort port, Byte data)
     if (ioctl(gpio_driver, GPIO_IOC_DO_IO, &ioctl_data))
         error(_("Failure writing to port %d: %s"), port, strerror(errno));
 
-    /* If no data has been consumed by the port.  */
+    /* if no data has been consumed by the port */
     if (ioctl_data.inlen == 0)
         gpio_port_error = TRUE;
 
@@ -198,23 +190,21 @@ gpio_write (ParallelPort port, Byte data)
 }
 
 
-/* Read a byte of data from the given port.  */
-
-Byte
-gpio_read (ParallelPort port)
+/* read a byte of data from the given port */
+Byte gpio_read(ParallelPort port)
 {
     ioctl_data.inlen    = 2;
     ioctl_data.inbuf[0] = (char) (port + 0x80);
 //  ioctl_data.inbuf[1] is ignored
 
-    /* N.B. outlen must be set!  */
+    /* N.B. outlen must be set! */
     ioctl_data.outlen    = 1;
     ioctl_data.outbuf[0] = (char) 0; // in case the read fails
 
     if (ioctl(gpio_driver, GPIO_IOC_DO_IO, &ioctl_data))
         error(_("Failure reading from port %d: %s"), port, strerror(errno));
 
-    /* If no data has been provided by the port  */
+    /* if no data has been provided by the port */
     if (ioctl_data.outlen == 0)
         gpio_port_error = TRUE;
 
@@ -225,10 +215,7 @@ gpio_read (ParallelPort port)
 }
 
 
-/* Write a series of bytes of data to the ports.  */
-
-void
-gpio_write_array (GPIO_Pair array[], unsigned int num_elements)
+void gpio_write_array (GPIO_Pair array[], unsigned int num_elements)
 {
     char         buffer[num_elements * 2];
     GPIO_ioctl   data = { 0, buffer, 0, NULL };
@@ -243,7 +230,7 @@ gpio_write_array (GPIO_Pair array[], unsigned int num_elements)
     if (ioctl(gpio_driver, GPIO_IOC_DO_IO, &data))
         error(_("Failure writing to port: %s"), strerror(errno));
 
-    /* If no data has been consumed by the port.  */
+    /* if no data has been consumed by the port */
     if (ioctl_data.inlen == 0)
         gpio_port_error = TRUE;
 }

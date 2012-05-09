@@ -30,8 +30,8 @@
 /*                                                                            */
 /******************************************************************************/
 
-#ifndef ARC_SIM_REGISTERS_H
-#define ARC_SIM_REGISTERS_H
+#ifndef ARC_REGISTERS_H
+#define ARC_REGISTERS_H
 
 
 typedef enum
@@ -43,21 +43,16 @@ typedef enum
 } ARC_RegisterClass;
 
 
-typedef void (*ARC_RegisterMappingFunction)(int gdb_regno, int *hw_regno, ARC_RegisterClass *regclass);
-
-typedef void (*ARC_AuxRegisterConversionFunction)(int gdb_regno, void *buffer);
+typedef void (*ARC_RegisterMappingFunction)(int, int*, ARC_RegisterClass*);
 
 
 void arc_hw_register_mapping(int                gdb_regno,
-                             int               *hw_regno,
-                             ARC_RegisterClass *reg_class);
+                             int*               hw_regno,
+                             ARC_RegisterClass* reg_class);
 
-void arc_aux_register_conversion(int gdb_regno, void *buffer);
 
 void arc_set_register_mapping(ARC_RegisterMappingFunction function);
 
-void arc_set_aux_register_conversion(ARC_AuxRegisterConversionFunction function);
 
-
-#endif /* ARC_SIM_REGISTERS_H */
+#endif /* ARC_REGISTERS_H */
 /******************************************************************************/

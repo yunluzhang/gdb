@@ -153,7 +153,7 @@ remote_fileio_reset (void)
 void
 remote_fileio_request (char *buf)
 {
-  static struct file_io_operations operations =
+  static struct memory_operations operations =
   {
      remote_read_bytes,
      remote_fileio_write_bytes,

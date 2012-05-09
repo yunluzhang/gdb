@@ -1,6 +1,6 @@
 /* Hosted File I/O interface definitions, for GDB, the GNU Debugger.
 
-   Copyright (C) 2007 Free Software Foundation, Inc.
+   Copyright (C) 2007 ARC International (UK) LTD
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License as

@@ -1,6 +1,6 @@
 /* Main header for the arc.
-   Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.  */
+   Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
+   Copyright (C) 2007 ARC International (UK) LTD  */
 
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H

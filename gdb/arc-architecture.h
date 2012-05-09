@@ -1,6 +1,6 @@
 /* Target dependent code for ARC processor family, for GDB, the GNU debugger.
 
-   Copyright 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2009 Free Software Foundation, Inc.
 
    Contributed by ARC International (www.arc.com)
 
@@ -11,7 +11,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -20,7 +20,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 /******************************************************************************/
 /*                                                                            */
@@ -34,7 +36,6 @@
 #define ARC_ARCHITECTURE_H
 
 /* gdb header files */
-#include "defs.h"
 #include "gdbarch.h"
 #include "bfd/bfd-in2.h"
 
@@ -53,22 +54,18 @@ typedef enum arc_processor_version
 } ARC_ProcessorVersion;
 
 
-#define ARCHITECTURE_CHECK(arch, bfd)      arc_check_architecture (arch, bfd, __FILE__, __FUNCTION__)
+ARC_ProcessorVersion arc_get_architecture(ARC_RegisterNumber identity_regnum);
+
+void arc_update_architecture(ARC_RegisterNumber identity_regnum);
+
+void arc_check_architecture(struct gdbarch* gdbarch, bfd* objfile_bfd);
+
+ARC_ProcessorVersion arc_version(const char* arch);
+
+const char* arc_version_image(ARC_ProcessorVersion version);
 
 
-void arc_architecture_is_unknown (void);
-
-ARC_ProcessorVersion arc_get_architecture (ReadRegisterFunction read_aux_register);
-
-void arc_update_architecture (ReadRegisterFunction read_register);
-
-void arc_check_architecture (struct gdbarch *gdbarch, bfd *objfile_bfd,
-                             const char* file, const char* function);
-
-ARC_ProcessorVersion arc_version (const char *arch);
-
-const char* arc_version_image (ARC_ProcessorVersion version);
-
+extern ARC_ProcessorVersion ARC_processor;
 
 #endif /* ARC_ARCHITECTURE_H */
 /******************************************************************************/

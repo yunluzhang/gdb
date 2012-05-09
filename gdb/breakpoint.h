@@ -175,10 +175,8 @@ enum target_hw_bp_type
 
 struct bp_target_info
 {
-// begin ARC
   /* Range breakpoints added */
   unsigned int range;
-//end ARC
 
   /* Address at which the breakpoint was placed.  This is normally the
      same as ADDRESS from the bp_location, except when adjustment
@@ -707,9 +705,7 @@ extern void breakpoint_clear_ignore_counts (void);
 
 extern void break_command (char *, int);
 
-// begin ARC
 extern void watch_range_command (unsigned int, unsigned int, int, int);
-//end ARC
 
 extern void hbreak_command_wrapper (char *, int);
 extern void thbreak_command_wrapper (char *, int);

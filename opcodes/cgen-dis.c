@@ -125,7 +125,7 @@ hash_insn_array (CGEN_CPU_DESC cd,
 		    buf,
 		    CGEN_INSN_MASK_BITSIZE (insn),
 		    big_p);
-      hash = (* cd->dis_hash) (buf, value, big_p);
+      hash = (* cd->dis_hash) (buf, value);
       add_insn_to_hash_chain (hentbuf, insn, htable, hash);
     }
 
@@ -162,7 +162,7 @@ hash_insn_list (CGEN_CPU_DESC cd,
 		   buf,
 		   CGEN_INSN_MASK_BITSIZE (ilist->insn),
 		   big_p);
-      hash = (* cd->dis_hash) (buf, value, big_p);
+      hash = (* cd->dis_hash) (buf, value);
       add_insn_to_hash_chain (hentbuf, ilist->insn, htable, hash);
     }
 
@@ -234,8 +234,7 @@ cgen_dis_lookup_insn (CGEN_CPU_DESC cd, const char * buf, CGEN_INSN_INT value)
   if (cd->dis_hash_table == NULL)
     build_dis_hash_table (cd);
 
-  hash
-    = (* cd->dis_hash) (buf, value, CGEN_CPU_ENDIAN (cd) == CGEN_ENDIAN_BIG);
+  hash = (* cd->dis_hash) (buf, value);
 
   return cd->dis_hash_table[hash];
 }

@@ -93,9 +93,7 @@ static int can_use_hardware_watchpoint (struct value *);
 
 static void break_command_1 (char *, int, int);
 
-// begin ARC
 static void watch_range_command_1 (unsigned int, unsigned int, int, int);
-// end ARC
 
 static void mention (struct breakpoint *);
 
@@ -846,12 +844,10 @@ update_watchpoint (struct breakpoint *b, int reparse)
   struct bp_location *loc;
   bpstat bs;
 
-// begin ARC
   /* If this is a range watchpoint.  */
   if (b->exp == NULL)
       /* There is no need to change it.  */
       return;
-// end ARC
 
   unlink_locations_from_global_list (b);
   for (loc = b->loc; loc;)
@@ -1028,9 +1024,7 @@ insert_bp_location (struct bp_location *bpt,
   /* Initialize the target-specific information.  */
   memset (&bpt->target_info, 0, sizeof (bpt->target_info));
   bpt->target_info.placed_address = bpt->address;
-// begin ARC
-  bpt->target_info.range = bpt->length;
-// end ARC
+  bpt->target_info.range = bpt->length;    // ARC
 
   if (bpt->loc_type == bp_loc_software_breakpoint
       || bpt->loc_type == bp_loc_hardware_breakpoint)
@@ -2117,7 +2111,6 @@ top:
   do_cleanups (old_chain);
 }
 
-// begin ARC
 static void
 check_range (struct breakpoint *bp, enum async_reply_reason reason)
 { 
@@ -2139,7 +2132,6 @@ check_range (struct breakpoint *bp, enum async_reply_reason reason)
         }
     }
 }
-// end ARC
 
 /* This is the normal print function for a bpstat.  In the future,
    much of this logic could (should?) be moved to bpstat_stop_status,
@@ -2259,10 +2251,8 @@ print_it_typical (bpstat bs)
 
     case bp_watchpoint:
     case bp_hardware_watchpoint:
-// begin ARC
       if (b->exp)
         {
-// end ARC
           if (bs->old_val != NULL)
 	    {
 	      annotate_watchpoint (b->number);
@@ -2283,20 +2273,16 @@ print_it_typical (bpstat bs)
 	      value_free (bs->old_val);
 	      bs->old_val = NULL;
 	    }
-// begin ARC
         }
       else
         check_range(b, EXEC_ASYNC_WATCHPOINT_TRIGGER);
-// end ARC
       /* More than one watchpoint may have been triggered.  */
       return PRINT_UNKNOWN;
       break;
 
     case bp_read_watchpoint:
-// begin ARC
       if (b->exp)
         {
-// end ARC
           if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string
 	      (uiout, "reason",
@@ -2308,19 +2294,15 @@ print_it_typical (bpstat bs)
           ui_out_field_stream (uiout, "value", stb);
           do_cleanups (ui_out_chain);
           ui_out_text (uiout, "\n");
-// begin ARC
         }
       else
         check_range(b, EXEC_ASYNC_READ_WATCHPOINT_TRIGGER);
-// end ARC
       return PRINT_UNKNOWN;
       break;
 
     case bp_access_watchpoint:
-// begin ARC
       if (b->exp)
         {
-// end ARC
           if (bs->old_val != NULL)     
 	    {
 	      annotate_watchpoint (b->number);
@@ -2351,11 +2333,9 @@ print_it_typical (bpstat bs)
           ui_out_field_stream (uiout, "new", stb);
           do_cleanups (ui_out_chain);
           ui_out_text (uiout, "\n");
-// begin ARC
         }
       else
         check_range(b, EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER);
-// end ARC
       return PRINT_UNKNOWN;
       break;
 
@@ -2594,10 +2574,8 @@ watchpoint_check (void *p)
 
   b = bs->breakpoint_at->owner;
 
-// begin ARC
   if (b->exp == NULL)
      return WP_VALUE_CHANGED;
-// end ARC
 
   if (b->exp_valid_block == NULL)
     within_current_scope = 1;
@@ -2737,16 +2715,12 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	&& b->type != bp_catch_exec)	/* a non-watchpoint bp */
       {
 	if (bl->address != bp_addr) 	/* address doesn't match */
-// begin ARC
           {
             /* is the address within the b/p range? */
             if (bp_addr < b->loc->address ||
                 bp_addr > b->loc->address + b->loc->length - 1)
-// end ARC
               continue;
-// begin ARC
           }
-// end ARC
 
 	if (overlay_debugging		/* unmapped overlay section */
 	    && section_is_overlay (bl->section) 
@@ -2844,7 +2818,6 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	struct value *v;
 	int must_check_value = 0;
 
-// begin ARC
         if (b->exp == NULL)
           {
             CORE_ADDR addr;
@@ -2861,7 +2834,6 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
           }
         else
           {
-// end ARC
  	    if (b->type == bp_watchpoint)
 	      /* For a software watchpoint, we must always check the
 	         watched value.  */
@@ -2942,9 +2914,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	        bs->stop = 0;
                 continue;
 	      }
-// begin ARC
           }
-// end ARC
       }
     else
       {
@@ -3565,10 +3535,8 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_hardware_watchpoint:
       case bp_read_watchpoint:
       case bp_access_watchpoint:
-// begin ARC
         if (b->exp)
           {
-// end ARC
 	    /* Field 4, the address, is omitted (which makes the columns
 	       not line up too nicely with the headers, but the effect
 	       is relatively readable).  */
@@ -3577,7 +3545,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 	    annotate_field (5);
 	    print_expression (b->exp, stb->stream);
 	    ui_out_field_stream (uiout, "what", stb);
-// begin ARC
           }
         else
           {
@@ -3589,7 +3556,6 @@ print_one_breakpoint_location (struct breakpoint *b,
             ui_out_text(uiout, "-byte range");
             *colon = ':';
           }
-// end ARC
 	break;
 
       case bp_catch_load:
@@ -3664,18 +3630,14 @@ print_one_breakpoint_location (struct breakpoint *b,
 	    if (b->loc == NULL || loc->shlib_disabled)
 	      ui_out_field_string (uiout, "addr", "<PENDING>");
 	    else
-// begin ARC
               {
-// end ARC
 	        ui_out_field_core_addr (uiout, "addr", loc->address);
-// begin ARC
                 if (b->exp == NULL && b->loc->length > 0)
                   {
                     ui_out_field_int(uiout, "what",  b->loc->length);
                     ui_out_text(uiout, "-byte range ");
                   }
               }
-// end ARC
 	  }
 	annotate_field (5);
 	if (!header_of_multiple)
@@ -4893,14 +4855,10 @@ mention (struct breakpoint *b)
 	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
 	ui_out_field_int (uiout, "number", b->number);
 	ui_out_text (uiout, ": ");
-// begin ARC
         if (b->exp)
-// end ARC
           print_expression (b->exp, stb->stream);
-// begin ARC
         else
           ui_out_text (uiout, b->exp_string);
-// end ARC
 	ui_out_field_stream (uiout, "exp", stb);
 	do_cleanups (ui_out_chain);
 	break;
@@ -4909,14 +4867,10 @@ mention (struct breakpoint *b)
 	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
 	ui_out_field_int (uiout, "number", b->number);
 	ui_out_text (uiout, ": ");
-// begin ARC
         if (b->exp)
-// end ARC
           print_expression (b->exp, stb->stream);
-// begin ARC
         else
           ui_out_text (uiout, b->exp_string);
-// end ARC
 	ui_out_field_stream (uiout, "exp", stb);
 	do_cleanups (ui_out_chain);
 	break;
@@ -4925,14 +4879,10 @@ mention (struct breakpoint *b)
 	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
 	ui_out_field_int (uiout, "number", b->number);
 	ui_out_text (uiout, ": ");
-// begin ARC
         if (b->exp)
-// end ARC
           print_expression (b->exp, stb->stream);
-// begin ARC
         else
           ui_out_text (uiout, b->exp_string);
-// end ARC
 	ui_out_field_stream (uiout, "exp", stb);
 	do_cleanups (ui_out_chain);
 	break;
@@ -5000,10 +4950,8 @@ mention (struct breakpoint *b)
 	    {
 	      printf_filtered (" at ");
 	      fputs_filtered (paddress (b->loc->address), gdb_stdout);
-// begin ARC
               if (b->exp == NULL && b->loc->length > 0)
                 printf_filtered(" covering %u bytes", b->loc->length);
-// end ARC
 	    }
 	  if (b->source_file)
 	    printf_filtered (": file %s, line %d.",
@@ -5690,13 +5638,11 @@ break_command (char *arg, int from_tty)
   break_command_1 (arg, 0, from_tty);
 }
 
-// begin ARC
 void
 watch_range_command (unsigned int address, unsigned int bytes, int accessflag, int from_tty)
 {
     watch_range_command_1 (address, bytes, accessflag, from_tty);
 }
-// end ARC
 
 void
 tbreak_command (char *arg, int from_tty)
@@ -6009,9 +5955,10 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 
 
 // begin ARC
+
 /* accessflag:  hw_write:   watch write, 
                 hw_read:    watch read, 
-                hw_access:  watch access (read or write)
+		hw_access:  watch access (read or write)
                 hw_execute: execute access */
 static void
 watch_range_command_1 (unsigned int address, unsigned int bytes, int accessflag, int from_tty)
@@ -6078,6 +6025,7 @@ watch_range_command_1 (unsigned int address, unsigned int bytes, int accessflag,
 
   mention (b);
 }
+
 // end ARC
 
 
@@ -8160,7 +8108,7 @@ insert_single_step_breakpoint (CORE_ADDR next_pc)
       /* richards/2008/10/27 ARC bug fix: if setting the (second)
        * b/p failed, we must unset the first
        *
-       * gdb bug: 9649
+       * gdb bug: 2544
        */
       if (single_step_breakpoints[0] != NULL)
          remove_single_step_breakpoints ();

@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    to not think the process has died (so it can be debugged at the point of
    failure).  */
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #ifndef SIGTRAP
 #define SIGTRAP 5
 #endif

@@ -1,5 +1,6 @@
 /* arc simulator support code
-   Copyright (C) 1996, 1997, 1998, 2003, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 2003 Free Software Foundation, Inc.
+   Copyright (C) 2007 ARC International (UK) LTD
 
    This file is part of GDB, the GNU debugger.
 

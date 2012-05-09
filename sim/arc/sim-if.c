@@ -1,6 +1,7 @@
 /* Main simulator entry points specific to the ARC.
-   Copyright (C) 1996, 1997, 1998, 1999, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
+   Copyright (C) 2007 ARC International (UK) LTD
 
    This file is part of GDB, the GNU debugger.
 
@@ -247,8 +248,7 @@ print_arc_misc_cpu (SIM_CPU *cpu, int verbose)
 
 
 #ifdef LOGGING
-static void
-dump (SIM_DESC sd, char** argv, char** envp)
+static void dump(SIM_DESC sd, char** argv, char** envp)
 {
   char **cpp, **rpp;
   char* tag;
@@ -263,16 +263,19 @@ dump (SIM_DESC sd, char** argv, char** envp)
            for (rpp = cpp; *rpp; rpp++, i++)
                sim_io_eprintf(sd, "%s[%d] = %s\n", tag, i, *rpp);
         }
+#ifndef PUSH_ENVIRONMENT_ONTO_STACK
+      // exit loop after dumping the args
+      break;
+#endif
     }
 }
 #endif
 
-/* Setup copy arguments / environment to the stack area of SD according
-   to argv and envp.  Either or both of argv and envp may be NULL.
-   Return 0 on failure, nonzero on success.  */
 
-static int
-setup_stack (SIM_DESC sd, int little_endian_p, char** argv, char** envp)
+static int setup_stack(SIM_DESC sd,
+                       int      little_endian_p,
+                       char**   argv,    // may be NULL
+                       char**   envp)    // may be NULL
 {
   SIM_CPU* cpu = STATE_CPU (sd, 0);
   int      wpp = sd->memory.stack_top + TARGET_INT_SIZE;
@@ -317,7 +320,7 @@ setup_stack (SIM_DESC sd, int little_endian_p, char** argv, char** envp)
  while (0)
 
 
- /* Push the arguments and environment onto the stack.  */
+/* push the arguments and environment onto the stack */
 
   write_dword (sd->memory.stack_top, sd->memory.num_arguments);
   for (cpp = argv, count = 2; count--; cpp = envp)
@@ -349,8 +352,12 @@ setup_stack (SIM_DESC sd, int little_endian_p, char** argv, char** envp)
       write_dword (wpp, 0);         // NULL array terminator
       wpp += TARGET_POINTER_SIZE;
 
+#ifndef PUSH_ENVIRONMENT_ONTO_STACK
+      // exit the loop after pushing the arguments
+      break;
+#endif
     }
-  write_dword (wpp, 0); /* uClibc aux_dat NULL terminator.  */
+  write_dword (wpp, 0);             // why is there an extra terminator?
 
   /* success */
   return 1;
@@ -359,31 +366,32 @@ setup_stack (SIM_DESC sd, int little_endian_p, char** argv, char** envp)
 
 /* Find out heap and stack end boundaries, and calculate required memory size;
    if this cannot be done, use the default memory size.
-   ABFD, ARGV and/or ENVP may be NULL.
    If this calculation fails, return 0.  */
-
-static int
-determine_memory_requirements (SIM_DESC sd, struct bfd *abfd, char **argv,
-			       char **envp, struct sim_memory* memory)
+static int determine_memory_requirements(SIM_DESC           sd,
+                                         struct bfd*        abfd,   // may be NULL
+                                         char**             argv,   // may be NULL
+                                         char**             envp,   // may be NULL
+                                         struct sim_memory* memory)
 {
   USI    stack_start           = 0, stack_top = 0, heap_start = 0, heap_end = 0;
   USI    program_end           = 0;
   USI    memory_size;
   USI    data_start;
   int    argc                  = 0;
-  size_t total_argument_length = 0;
+  size_t total_argument_length = 0;;
   int    num_pointers          = 0;
 
   /* N.B. the *_end variables actually denote the next byte after the end of
-   the sections to which they refer; however, they are used consistently
-   in this way, so that is not a problem!  */
+   *      the sections to which they refer; however, they are used consistently
+   *      in this way, so that is not a problem!
+   */
 
-  /* If we have an executable file to look at.  */
+  /* if we have an executable file to look at */
   if (abfd)
     {
       asection* section;
 
-      /* Look at each section in the file.  */
+      /* look at each section in the file */
       for (section = abfd->sections; section; section = section->next)
         {
           if (strcmp (bfd_get_section_name (abfd, section), ".stack") == 0)
@@ -392,10 +400,11 @@ determine_memory_requirements (SIM_DESC sd, struct bfd *abfd, char **argv,
               stack_top   = stack_start + bfd_section_size (abfd, section);
               stack_top  &= -TARGET_POINTER_SIZE;
 
-              /* N.B. this assumes that the target memory region to be
-		 created has the range 0 .. stack_top - 1, i.e. that there
-		 is nothing in the program that has to be loaded at
-		 addresses above the stack top.  */
+              /* N.B. this assumes that the target memory region to be created
+               *      has the range 0 .. stack_top - 1, i.e. that there is
+               *      nothing in the program that has to be loaded at addresses
+               *      above the stack top
+               */
               memory_size = stack_top;
             }
           else if (strcmp (bfd_get_section_name (abfd, section), ".heap") == 0)
@@ -408,45 +417,43 @@ determine_memory_requirements (SIM_DESC sd, struct bfd *abfd, char **argv,
               USI section_end = bfd_get_section_vma (abfd, section) +
                                 bfd_section_size    (abfd, section);
 
-              /* Keep track of the end address of whatever else is to be
-		 loaded.  */
+              /* keep track of the end address of whatever else is to be loaded */
               if (program_end < section_end)
                 program_end = section_end;
             }
         }
 
-       /* If we know the start of the stack, check for an overlap.  */ 
+       /* if we know the start of the stack, check for an overlap */ 
       if (stack_start > 0 && program_end > stack_start)
-	{
-	  sim_io_eprintf(sd,
-			 "program data overlaps program stack at 0x%x (0x%x)\n",
-			 stack_start, program_end);
-	  return 0;
-	}
+        {
+          sim_io_eprintf(sd, "program data overlaps program stack at 0x%x (0x%x)\n", stack_start, program_end);
+          return 0;
+        }
 
-       /* No heap section found?  */
+       /* no heap section found? */
       if (heap_end == 0)
         {
-          /* Assume the heap lies between the program data and the stack.  */
+          /* assume the heap lies between the program data and the stack */
           heap_start = program_end;
           heap_end   = stack_start;
         }
     }
 
 
-  /* If we have arguments or environment variables to pass to the program.  */
+  /* if we have arguments or environment variables to pass to the program */
 
   if (argv)
     {
-      char **rpp;
+      char** rpp;
 
       for (rpp = argv; *rpp; rpp++, num_pointers++)
          total_argument_length += strlen (*rpp) + 1; 
 
        argc = num_pointers;
     }
-  num_pointers++; /* For NULL terminator.  */
+  num_pointers++;   // for NULL terminator
 
+#ifdef PUSH_ENVIRONMENT_ONTO_STACK
   if (envp)
     {
       char** rpp;
@@ -454,23 +461,26 @@ determine_memory_requirements (SIM_DESC sd, struct bfd *abfd, char **argv,
       for (rpp = envp; *rpp; rpp++, num_pointers++)
          total_argument_length += strlen (*rpp) + 1;   
     }
-  num_pointers++;   /* For NULL terminator.  */
+#endif
+  num_pointers++;   // for NULL terminator
 
-  num_pointers++;   /* For uclibc aux_dat.  */
+  num_pointers++;   /* For uclibc aux_dat */
 
-  /* If we could not get the stack bounds from the executable file (and hence
-     do not know the memory size), use the default memory size and take the
-     top of the stack as being at the end of that memory range (aligned to
-     the size of a target pointer).  */
+  /* if we could not get the stack bounds from the executable file (and hence
+   * do not know the memory size), use the default memory size and take the top
+   * of the stack as being at the end of that memory range (aligned to the size
+   * of a target pointer)
+   */
   if (!stack_top)
     stack_top = (USI) ((ARC_DEFAULT_MEM_SIZE + 3) & -TARGET_POINTER_SIZE);
 
   data_start = (USI) (stack_top                          +
-                      TARGET_INT_SIZE                    +  /* For argc.  */
+                      TARGET_INT_SIZE                    +  // for argc
                       num_pointers * TARGET_POINTER_SIZE);
 
-  /* We need enough memory to hold the program stack, plus the data to be passed
-     above the top of the stack.  */
+  /* we need enough memory to hold the program stack, plus the data to be passed
+   * above the top of the stack
+   */
   memory_size = (USI) (data_start + total_argument_length);
 
 #ifdef PUSH_ENVIRONMENT_ONTO_STACK
@@ -478,9 +488,11 @@ determine_memory_requirements (SIM_DESC sd, struct bfd *abfd, char **argv,
      memory_size += DEFAULT_ENVIRONMENT_SPACE;
 #endif
 
-  /* Round up to multiple of 32: strlen expects memory to come in chunks
-     that are at least cache-line (32 bytes) sized.
-     FIXME: is that true?  */
+  /* Round up to multiple of 32.  strlen expects memory to come in chunks
+   * that are at least cache-line (32 bytes) sized.
+   *
+   * N.B. is that true?
+   */
   memory_size += 31;
   memory_size &= -32;
 
@@ -502,15 +514,14 @@ determine_memory_requirements (SIM_DESC sd, struct bfd *abfd, char **argv,
   sim_io_eprintf(sd, "%d args\n", argc);
 #endif
 
-  /* Success.  */
+  /* success */
   return 1;
 }
 
 
-static void
-define_memory_region (SIM_DESC sd, USI start, USI size)
+static void define_memory_region(SIM_DESC sd, USI start, USI size)
 { 
-  /* Allocate core managed memory if none specified by user.  */
+  /* Allocate core managed memory if none specified by user. */
   if (!sd->memory_regions_defined_by_user)
     {
 #ifdef LOGGING
@@ -529,9 +540,9 @@ define_memory_region (SIM_DESC sd, USI start, USI size)
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND  kind,
-          host_callback *callback,
-          struct bfd    *abfd,      /* May be NULL.  */
-          char         **argv)
+          host_callback* callback,
+          struct bfd*    abfd,      // may be NULL
+          char**         argv)
 {
   SIM_DESC sd = sim_state_alloc (kind, callback);
   int      little_endian_p;
@@ -552,8 +563,8 @@ sim_open (SIM_OPEN_KIND  kind,
       return 0;
     }
 
-#if 0 /* FIXME: pc is in mach-specific struct.  */
-  /* FIXME: watchpoints code shouldn't need this.  */
+#if 0 /* FIXME: pc is in mach-specific struct */
+  /* FIXME: watchpoints code shouldn't need this */
   {
     SIM_CPU *current_cpu = STATE_CPU (sd, 0);
     STATE_WATCHPOINTS (sd)->pc = &(PC);
@@ -567,7 +578,7 @@ sim_open (SIM_OPEN_KIND  kind,
       return 0;
     }
 
-#ifdef HAVE_DV_SOCKSER /* FIXME: was done differently before.  */
+#ifdef HAVE_DV_SOCKSER /* FIXME: was done differently before */
   if (dv_sockser_install (sd) != SIM_RC_OK)
     {
       free_state (sd);
@@ -575,7 +586,7 @@ sim_open (SIM_OPEN_KIND  kind,
     }
 #endif
 
-#if 0 /* FIXME: 'twould be nice if we could do this.  */
+#if 0 /* FIXME: 'twould be nice if we could do this */
   /* These options override any module options.
      Obviously ambiguity should be avoided, however the caller may wish to
      augment the meaning of an option.  */
@@ -593,7 +604,7 @@ sim_open (SIM_OPEN_KIND  kind,
     }
 
 #ifdef LOGGING
-  /* sim_parse_args may set up STATE_PROG_ARGV(sd), in the case that kind == SIM_OPEN_STANDALONE.  */
+// sim_parse_args may set up STATE_PROG_ARGV(sd), in the case that kind == SIM_OPEN_STANDALONE
   dump(sd, STATE_PROG_ARGV (sd), NULL);
 #endif
 
@@ -610,7 +621,7 @@ sim_open (SIM_OPEN_KIND  kind,
 
   prog_argv = STATE_PROG_ARGV (sd);
 
-  /* If we have not been given an executable file.  */
+  /* if we have not been given an executable file */
   if (!abfd)
     {
       /* If the test below fails, we will use ARC_DEFAULT_MEM_SIZE. */
@@ -638,31 +649,34 @@ sim_open (SIM_OPEN_KIND  kind,
   little_endian_p = IS_LITTLE_ENDIAN(abfd);
 
   /* Check whether core managed memory has been specified by user.
-     Use address 4 here in case the user wanted address 0 unmapped.
-     N.B. this is really not a very good check - we want to know whether the
-     user has explicitly specified the target's memory regions, so that we
-     don't define a region ourself (which might overlap), and we try to
-     find that out by seeing if we can read the memory at address 0x4 !!!!  */
+   * Use address 4 here in case the user wanted address 0 unmapped.
+   *
+   * N.B. this is really not a very good check - we want to know whether the
+   *      user has explicitly specified the target's memory regions, so that we
+   *      don't define a region ourself (which might overlap), and we try to
+   *      find that out by seeing if we can read the memory at address 0x4 !!!!
+   */
   sd->memory_regions_defined_by_user = 
     sim_core_read_buffer (sd, NULL, read_map, &c, 4, 1) != 0;
 
-  /* Calculate the memory size required without actually initializing the stack.  */
+  /* calculate the memory size required without actually initializing the stack */
   if (!determine_memory_requirements(sd, abfd, prog_argv, NULL, &sd->memory))
     {
       free_state (sd);
       return 0;
     }
 
-  define_memory_region (sd, 0, sd->memory.total_size);
+  define_memory_region(sd, 0, sd->memory.total_size);
 
-  /* If the simulator is being used stand-alone, we know that the program 
-     arguments we have been given here are not going to change later on (when
-     sim_create_inferior is called) - so we can go ahead and set up the stack
-     with those arguments right now.  */
-  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
+  /* if the simulator is being used stand-alone, we know that the program 
+   * arguments we have been given here are not going to change later on (when
+   * sim_create_inferior is called) - so we can go ahead and set up the stack
+   * with those arguments right now
+   */
+  if (STATE_OPEN_KIND(sd) == SIM_OPEN_STANDALONE)
     {
-      /* Now that we do know the memory size, initialize the stack.  */
-      if (!setup_stack (sd, little_endian_p, prog_argv, NULL))
+      /* now that we do know the memory size, initialize the stack */
+      if (!setup_stack(sd, little_endian_p, prog_argv, NULL))
         {
           free_state (sd);
           return 0;
@@ -702,7 +716,7 @@ sim_open (SIM_OPEN_KIND  kind,
       memset (CPU_ARC_MISC_PROFILE (STATE_CPU (sd, i)), 0,
 	      sizeof (* CPU_ARC_MISC_PROFILE (STATE_CPU (sd, i))));
 
-      /* Hook in callback for reporting these stats.  */
+      /* Hook in callback for reporting these stats */
       PROFILE_INFO_CPU_CALLBACK (CPU_PROFILE_DATA (STATE_CPU (sd, i))) =
          print_arc_misc_cpu;
     }
@@ -715,26 +729,24 @@ sim_open (SIM_OPEN_KIND  kind,
 }
 
 
-void
-sim_close (SIM_DESC sd, int quitting)
+void sim_close (SIM_DESC sd, int quitting)
 {
   arc_cgen_cpu_close (CPU_CPU_DESC (STATE_CPU (sd, 0)));
   sim_module_uninstall (sd);
 }
 
 
-SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **envp)
+SIM_RC sim_create_inferior (SIM_DESC    sd,
+                            struct bfd* abfd,
+                            char**      argv,
+                            char**      envp)
 {
-  SIM_CPU *current_cpu = STATE_CPU (sd, 0);
+  SIM_CPU* current_cpu = STATE_CPU (sd, 0);
   SIM_ADDR addr;
 
-#ifndef PUSH_ENVIRONMENT_ONTO_STACK
-  envp = NULL;
-#endif
 #ifdef LOGGING
   sim_io_eprintf (sd, "sim_create_inferior: %p\n", abfd);
-  dump (sd, argv, envp);
+  dump(sd, argv, envp);
 #endif
 
   if (abfd != NULL)
@@ -745,8 +757,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **envp)
         {
           if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
             {
-              sim_io_eprintf (sd, "Target is big-endian but executable file %s is little-endian.\n",
-			      bfd_get_filename (abfd));
+              sim_io_eprintf (sd, "Target is big-endian but executable file %s is little-endian.\n", bfd_get_filename(abfd));
               return SIM_RC_FAIL;
             }
         }
@@ -754,8 +765,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **envp)
         {
           if (CURRENT_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
             {
-              sim_io_eprintf (sd, "Target is little-endian but executable file %s is big-endian.\n",
-			      bfd_get_filename(abfd));
+              sim_io_eprintf (sd, "Target is little-endian but executable file %s is big-endian.\n", bfd_get_filename(abfd));
               return SIM_RC_FAIL;
             }
         }
@@ -767,15 +777,16 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **envp)
 
   sim_pc_set (current_cpu, addr);
 
-  /* If the simulator is being used stand-alone, we have already set up the
-     stack (when sim_open was called); but if the simulator is being used by
-     gdb we must set up the stack each time that sim_create_inferior is
-     called, in case the program arguments have changed since last time.  */
+  /* if the simulator is being used stand-alone, we have already set up the
+   * stack (when sim_open was called); but if the simulator is being used by gdb
+   * we must set up the stack each time that sim_create_inferior is called, in
+   * case the program arguments have changed since last time
+   */
   if (STATE_OPEN_KIND(sd) == SIM_OPEN_DEBUG)
     {
       struct sim_memory memory;
 
-      if (determine_memory_requirements (sd, abfd, argv, envp, &memory))
+      if (determine_memory_requirements(sd, abfd, argv, envp, &memory))
         {
           USI current_size = sd->memory.total_size;
 
@@ -787,31 +798,31 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **envp)
                                    memory.total_size, current_size);
 #endif
 
-              /* Define another memory region to provide the extra memory
-		 required.  */
-              define_memory_region (sd, current_size,
-				    memory.total_size - current_size);
+              /* define another memory region to provide the extra memory required */
+              define_memory_region(sd,
+                                   current_size,
+                                   memory.total_size - current_size);
 
-              /* Update all the memory details.  */
+              /* and update all the memory details */
               sd->memory = memory;
             }
           else
             {
-              /* Update all the memory details *except* the current size.  */
+              /* and update all the memory details *except* the current size */
               sd->memory = memory;
               sd->memory.total_size = current_size;
             }
 
-	  if (!setup_stack (sd, IS_LITTLE_ENDIAN (abfd), argv, envp))
-	    return SIM_RC_FAIL;
-	}
+          if (!setup_stack(sd, IS_LITTLE_ENDIAN(abfd), argv, envp))
+              return SIM_RC_FAIL;
+        }
       else
-	return SIM_RC_FAIL;
+          return SIM_RC_FAIL;
     }
 
   current_cpu->endbrk = sd->memory.heap_start;
 
-  /* Set r28 (SP) to the stack top, and set r0/r1 to argc/argv. */
+  /* set r28 (sp) to the stack top, and set r0/r1 to argc/argv */
   a5f_h_cr_set (current_cpu, 0,  sd->memory.num_arguments);
   a5f_h_cr_set (current_cpu, 1,  sd->memory.stack_top + 4);
   a5f_h_cr_set (current_cpu, 28, sd->memory.stack_top);
@@ -831,8 +842,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **envp)
 }
 
 
-void
-sim_do_command (SIM_DESC sd, char* cmd)
+void sim_do_command (SIM_DESC sd, char* cmd)
 {
   char **argv;
 
@@ -841,7 +851,7 @@ sim_do_command (SIM_DESC sd, char* cmd)
 
   argv = buildargv (cmd);
 
-  /* Is the command 'info reg[ister] <name>' ?  */
+  /* is the command 'info reg[ister] <name>' ? */
 
   if (argv[0] != NULL
       && strcasecmp (argv[0], "info") == 0
@@ -855,7 +865,7 @@ sim_do_command (SIM_DESC sd, char* cmd)
       else if (argv[3] != NULL)
         sim_io_eprintf (sd, "Too many arguments in `%s'\n", cmd);
 
-      /* Should we recognize some/all of the ARC register names here?  */
+      /* should we recognize some/all of the ARC register names here?  */
 
       else
 	sim_io_eprintf (sd, "Printing of register `%s' not supported with `sim info'\n",

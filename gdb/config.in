@@ -158,15 +158,6 @@
 /* Define if you have the expat library. */
 #undef HAVE_LIBEXPAT
 
-/* Define if you have the ARC xISS library. */
-#undef HAVE_LIBXISS
-
-/* Define if you are building the ARC bare-board debugger. */
-#undef ARC_ELF32_TARGET
-
-/* Define if you are building the ARC Linux debugger. */
-#undef ARC_LINUX_TARGET
-
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 

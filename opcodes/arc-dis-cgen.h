@@ -17,12 +17,9 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#ifndef ARCDIS_H
-#define ARCDIS_H
-
-int ARCTangent_decodeInstr(bfd_vma address, disassemble_info* info);
-int ARCompact_decodeInstr (bfd_vma address, disassemble_info* info);
+#ifndef ARC_DIS_CGEN_H
+#define ARC_DIS_CGEN_H
 
 #define __TRANSLATION_REQUIRED(state)	((state).acnt != 0)
 
-#endif
+#endif /* ARC_DIS_CGEN_H */

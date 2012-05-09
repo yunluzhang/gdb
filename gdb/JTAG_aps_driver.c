@@ -1,24 +1,28 @@
 /* Target dependent code for ARC700, for GDB, the GNU debugger.
 
-   Copyright 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2008 Free Software Foundation, Inc.
 
    Contributed by ARC International (www.arc.com)
 
    Authors:
       Richard Stuckey <richard.stuckey@arc.com>
 
+   This file is part of GDB.
+   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+*/
 
 /******************************************************************************/
 /*                                                                            */
@@ -53,26 +57,19 @@
 #include "arc-jtag.h"
 #include "arc-jtag-ops.h"
 #include "arc-jtag-actionpoints.h"
-#include "arc-registers.h"
+#include "arc-aux-registers.h"
 
 
 /* -------------------------------------------------------------------------- */
 /*                               local types                                  */
 /* -------------------------------------------------------------------------- */
 
-// complete the type here
+// complete the type here 
 struct aux_register_definition
 {
     const char*        name;
     ARC_RegisterNumber number;
-};
-
-
-typedef enum
-{
-    CLEAR_USER_BIT,
-    RESTORE_USER_BIT
-} Status32Action;
+};  
 
 
 /* -------------------------------------------------------------------------- */
@@ -82,15 +79,10 @@ typedef enum
 /* global debug flag */
 Boolean arc_debug_target;
 
-ARC_RegisterNumber arc_debug_regnum = ARC_HW_DEBUG_REGNUM;
-
 
 /* -------------------------------------------------------------------------- */
 /*                               local data                                   */
 /* -------------------------------------------------------------------------- */
-
-#define SUCCESS          0
-#define FAILURE        (-1)
 
 // what should this be?
 #define DATA_AREA            0x00001000
@@ -146,11 +138,11 @@ static void failed(const char* fmt, ...)
 {
     va_list ap;
 
-    fprintf(stderr, "*** FAILED: ");
+    printf("*** FAILED: ");
     va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
+    vprintf(fmt, ap);
     va_end(ap);
-    fprintf(stderr, "\n");
+    printf("\n");
 
 //  exit(EXIT_FAILURE);
 }
@@ -221,7 +213,7 @@ static struct bp_target_info bpt[MAX_ACTION_POINTS + 1];
         }
         for (i = 0; i < max_actionpoints + 1; i++)
         {
-            status = operations.to_remove_watchpoint(DATA_AREA, 4, WRITE_WATCHPOINT);
+            status = operations.to_remove_watchpoint(DATA_AREA, 4, WRITE_WATCHPOINT);     
             CHECK(status, (i < max_actionpoints) ? SUCCESS : FAILURE);
         }
 
@@ -403,9 +395,6 @@ static void process_options(int argc, char** argv)
 /*                               externally visible functions                 */
 /* -------------------------------------------------------------------------- */
 
-extern void _initialize_arc_jtag_ops(void);
-
-
 int main(int argc, char** argv)
 {
     Boolean opened;
@@ -450,7 +439,7 @@ int main(int argc, char** argv)
 }
 
 
-/* N.B. these functions are found in arc-jtag.c and arc-registers.c, but are
+/* N.B. these functions are found in arc-jtag.c and arc-aux-registers.c, but are
  *      included here in order to avoid including that module in the built test
  *      driver, as that would also pull in a lot of the gdb modules!
  *
@@ -459,7 +448,7 @@ int main(int argc, char** argv)
  *      module without a real JTAG target.
  */
 
-void arc_change_status32(Status32Action action)
+void arc_change_status32(ARC_Status32Action action)
 {
     static ARC_RegisterContents status32;
 

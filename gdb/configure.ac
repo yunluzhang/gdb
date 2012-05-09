@@ -480,32 +480,6 @@ else
   fi
 fi
 
-
-AC_ARG_WITH(xiss,
-  AS_HELP_STRING([--with-xiss], [include xiss support (auto/yes/no)]),
-  [], [with_xiss=auto])
-AC_MSG_CHECKING([whether to use xiss])
-AC_MSG_RESULT([$with_xiss])
-
-if test "${with_xiss}" = yes; then
-  HAVE_LIBXISS=yes
-  AC_DEFINE(HAVE_LIBXISS, 1, [Define if you have the xISS library.])
-  XISS_INCLUDES="-I${with_xiss_prefix}/include"
-  AC_SUBST(XISS_INCLUDES)
-else
-  AC_MSG_WARN([xiss support disabled; target arcxiss will be unavailable.])
-  HAVE_LIBXISS=no
-fi
-
-
-if test "${target}" = "arc-unknown-elf32"; then
-  AC_DEFINE(ARC_ELF32_TARGET, 1, [Define if you are building the ARC bare-board debugger.])
-fi
-if test "${target}" = "arc-unknown-linux-uclibc"; then
-  AC_DEFINE(ARC_LINUX_TARGET, 1, [Define if you are building the ARC Linux debugger.])
-fi
-
-
 # ------------------------- #
 # Checks for header files.  #
 # ------------------------- #

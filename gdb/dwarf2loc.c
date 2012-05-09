@@ -265,7 +265,6 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   return retval;
 }
 
-// begin ARC
 static CORE_ADDR
 dwarf2_find_address (struct symbol *var, struct frame_info *frame,
                      gdb_byte *data, unsigned short size,
@@ -347,7 +346,6 @@ dwarf2_find_size (struct symbol *var, struct frame_info *frame,
 
   return sz;
 }
-// end ARC
 
 
 /* Helper functions and baton for dwarf2_loc_desc_needs_frame.  */
@@ -515,7 +513,6 @@ locexpr_read_variable (struct symbol *symbol, struct frame_info *frame)
   return val;
 }
 
-// begin ARC
 /* Return the address of SYMBOL in FRAME using the DWARF-2 expression
    evaluator to calculate the location.  */
 static CORE_ADDR
@@ -537,7 +534,6 @@ locexpr_get_variable_size(struct symbol *symbol, struct frame_info *frame)
   return dwarf2_find_size (symbol, frame, dlbaton->data, dlbaton->size,
                            dlbaton->objfile);
 }
-// end ARC
 
 /* Return non-zero iff we need a frame to evaluate SYMBOL.  */
 static int
@@ -621,10 +617,8 @@ locexpr_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
    evaluator.  */
 const struct symbol_ops dwarf2_locexpr_funcs = {
   locexpr_read_variable,
-// begin ARC
   locexpr_get_variable_address,
   locexpr_get_variable_size,
-// end ARC
   locexpr_read_needs_frame,
   locexpr_describe_location,
   locexpr_tracepoint_var_ref
@@ -660,7 +654,6 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
   return val;
 }
 
-// begin ARC
 /* Return the address of SYMBOL in FRAME using the DWARF-2 expression
    evaluator to calculate the location.  */
 static CORE_ADDR
@@ -698,7 +691,6 @@ loclist_get_variable_size(struct symbol *symbol, struct frame_info *frame)
 
   return dwarf2_find_size(symbol, frame, data, size, dlbaton->objfile);
 }
-// end ARC
 
 /* Return non-zero iff we need a frame to evaluate SYMBOL.  */
 static int
@@ -743,10 +735,8 @@ loclist_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
    evaluator and location lists.  */
 const struct symbol_ops dwarf2_loclist_funcs = {
   loclist_read_variable,
-// begin ARC
   loclist_get_variable_address,
   loclist_get_variable_size,
-// end ARC
   loclist_read_needs_frame,
   loclist_describe_location,
   loclist_tracepoint_var_ref

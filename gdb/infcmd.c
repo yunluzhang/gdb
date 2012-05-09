@@ -1604,7 +1604,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	}
 
       {
-        /* richards ARC 29/10/27 gdb bug: 9884
+        /* richards ARC 29/10/27
            call the gdbarch_register_name once only!
          */
         const char* name = gdbarch_register_name (gdbarch, i);
@@ -1616,7 +1616,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
         fputs_filtered (name, file);
 
-        /* richards ARC 29/9/08 gdb bug: 9885
+        /* richards ARC 29/9/08
            Some ARC register names are longer than 15 chars!
            There should be a gdbarch_max_register_name_length function
            which could be called here instead of using an integer literal.  */

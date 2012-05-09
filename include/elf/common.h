@@ -179,7 +179,6 @@
 #define EM_PJ		 91	/* picoJava */
 #define EM_OPENRISC	 92	/* OpenRISC 32-bit embedded processor */
 #define EM_ARCOMPACT	 93	/* ARC Cores Tangent-A5 */
-#define EM_ARCOMPACT	 93     /* Also ARC600 & ARC700 */
 #define EM_XTENSA	 94	/* Tensilica Xtensa Architecture */
 #define EM_IP2K		101	/* Ubicom IP2022 micro controller */
 #define EM_CR		103	/* National Semiconductor CompactRISC */

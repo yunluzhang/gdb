@@ -2,23 +2,23 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2007 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
-   This file is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3, or (at your option)
-   any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
 
-   It is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with this program; if not, write to the Free Software Foundation, Inc.,
-   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -1926,7 +1926,7 @@ static const CGEN_OPINST sfmt_jl_s_d_ops[] ATTRIBUTE_UNUSED = {
   { INPUT, "h_auxr_SI_34", HW_H_AUXR, CGEN_MODE_SI, 0, 34, 0 },
   { INPUT, "h_auxr_SI_37", HW_H_AUXR, CGEN_MODE_SI, 0, 37, COND_REF },
   { INPUT, "h_e1_BI", HW_H_E1, CGEN_MODE_BI, 0, 0, 0 },
-  { INPUT, "h_memory_HI_add__DFLT_pc_2", HW_H_MEMORY, CGEN_MODE_HI, 0, 0, COND_REF },
+  { INPUT, "h_memory_HI_add__DFLT_pc_4", HW_H_MEMORY, CGEN_MODE_HI, 0, 0, COND_REF },
   { INPUT, "h_memory_UHI_countp", HW_H_MEMORY, CGEN_MODE_UHI, 0, 0, COND_REF },
   { INPUT, "h_prof_offset_SI_0", HW_H_PROF_OFFSET, CGEN_MODE_SI, 0, 0, COND_REF },
   { INPUT, "h_status32_SI_0", HW_H_STATUS32, CGEN_MODE_SI, 0, 0, COND_REF },

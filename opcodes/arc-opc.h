@@ -2,23 +2,23 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2007 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
-   This file is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3, or (at your option)
-   any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
 
-   It is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with this program; if not, write to the Free Software Foundation, Inc.,
-   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -39,7 +39,7 @@ extern unsigned int arc_cgen_dis_hash (const char *, int);
    we must make sure we read all the bits while we have the information how
    to read them.  */
 #define CGEN_INSN_DISASM_BITSIZE(insn) 64
-extern char limm_str[];
+extern char arc_limm_str[];
 
 /* cgen can't generate correct decoders for variable-length insns,
    so we have it generate a decoder that assumes all insns are 32 bit.
@@ -62,9 +62,9 @@ ARC_CGEN_EXTRACT_FN (CGEN_CPU_DESC cd, const CGEN_INSN *insn,
   if (!initialized)
     {
       static CGEN_KEYWORD_ENTRY arc_cgen_opval_limm_entry0 =
-	{ limm_str, 62, {0, {{{0, 0}}}}, 0, 0 };
+	{ arc_limm_str, 62, {0, {{{0, 0}}}}, 0, 0 };
       static CGEN_KEYWORD_ENTRY arc_cgen_opval_limm_entry1 =
-	{ limm_str, 62, {0, {{{0, 0}}}}, 0, 0 };
+	{ arc_limm_str, 62, {0, {{{0, 0}}}}, 0, 0 };
 
       cgen_keyword_add (&arc_cgen_opval_cr_names, &arc_cgen_opval_limm_entry0);
       cgen_keyword_add (&arc_cgen_opval_h_noilink, &arc_cgen_opval_limm_entry1);

@@ -457,7 +457,7 @@ int target_fio_no_longjmp = 0;
 
 
 static void
-target_fileio_func_open (char *buf, struct file_io_operations *operations)
+target_fileio_func_open (char *buf, struct memory_operations *operations)
 {
   CORE_ADDR ptrval;
   int length, retlength;
@@ -528,7 +528,7 @@ target_fileio_func_open (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_close (char *buf, struct file_io_operations *operations)
+target_fileio_func_close (char *buf, struct memory_operations *operations)
 {
   long num;
   int fd;
@@ -554,7 +554,7 @@ target_fileio_func_close (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_read (char *buf, struct file_io_operations *operations)
+target_fileio_func_read (char *buf, struct memory_operations *operations)
 {
   long target_fd, num;
   LONGEST lnum;
@@ -672,7 +672,7 @@ target_fileio_func_read (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_write (char *buf, struct file_io_operations *operations)
+target_fileio_func_write (char *buf, struct memory_operations *operations)
 {
   long target_fd, num;
   LONGEST lnum;
@@ -746,7 +746,7 @@ target_fileio_func_write (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_lseek (char *buf, struct file_io_operations *operations)
+target_fileio_func_lseek (char *buf, struct memory_operations *operations)
 {
   long num;
   LONGEST lnum;
@@ -800,7 +800,7 @@ target_fileio_func_lseek (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_rename (char *buf, struct file_io_operations *operations)
+target_fileio_func_rename (char *buf, struct memory_operations *operations)
 {
   CORE_ADDR old_ptr, new_ptr;
   int old_len, new_len, retlength;
@@ -894,7 +894,7 @@ target_fileio_func_rename (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_unlink (char *buf, struct file_io_operations *operations)
+target_fileio_func_unlink (char *buf, struct memory_operations *operations)
 {
   CORE_ADDR ptrval;
   int length, retlength;
@@ -935,7 +935,7 @@ target_fileio_func_unlink (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_stat (char *buf, struct file_io_operations *operations)
+target_fileio_func_stat (char *buf, struct memory_operations *operations)
 {
   CORE_ADDR statptr, nameptr;
   int ret, namelength, retlength;
@@ -999,7 +999,7 @@ target_fileio_func_stat (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_fstat (char *buf, struct file_io_operations *operations)
+target_fileio_func_fstat (char *buf, struct memory_operations *operations)
 {
   CORE_ADDR ptrval;
   int fd, ret, retlength;
@@ -1068,7 +1068,7 @@ target_fileio_func_fstat (char *buf, struct file_io_operations *operations)
     }
   else {
     ret = fstat (fd, &st);
-    target_fileio_to_fio_uint (st.st_dev, fst.fst_dev);  // ARC bug fix 10/11/2008  gdb bug: 9655
+    target_fileio_to_fio_uint (st.st_dev, fst.fst_dev);  // ARC bug fix 10/11/2008  gdb bug #2550
   }
 
   if (ret == -1)
@@ -1091,7 +1091,7 @@ target_fileio_func_fstat (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_gettimeofday (char *buf, struct file_io_operations *operations)
+target_fileio_func_gettimeofday (char *buf, struct memory_operations *operations)
 {
   LONGEST lnum;
   CORE_ADDR ptrval;
@@ -1143,7 +1143,7 @@ target_fileio_func_gettimeofday (char *buf, struct file_io_operations *operation
 }
 
 static void
-target_fileio_func_isatty (char *buf, struct file_io_operations *operations)
+target_fileio_func_isatty (char *buf, struct memory_operations *operations)
 {
   long target_fd;
   int fd;
@@ -1161,7 +1161,7 @@ target_fileio_func_isatty (char *buf, struct file_io_operations *operations)
 }
 
 static void
-target_fileio_func_system (char *buf, struct file_io_operations *operations)
+target_fileio_func_system (char *buf, struct memory_operations *operations)
 {
   CORE_ADDR ptrval;
   int ret, length, retlength;
@@ -1212,7 +1212,7 @@ target_fileio_func_system (char *buf, struct file_io_operations *operations)
 
 static struct {
   char *name;
-  void (*func)(char *, struct file_io_operations *);
+  void (*func)(char *, struct memory_operations *);
 } target_fio_func_map[] = {
   { "open",         target_fileio_func_open         },
   { "close",        target_fileio_func_close        },
@@ -1231,7 +1231,7 @@ static struct {
 
 struct request_args {
     char                     *buf;
-    struct file_io_operations *operations;
+    struct memory_operations *operations;
 };
 
 static int
@@ -1242,7 +1242,8 @@ do_target_fileio_request (struct ui_out *uiout, void *args)
   char *c;
   int idx;
 
-  request->operations->set_ctrl_c_signal_handler();
+  if (request->operations->pre_action)
+    request->operations->pre_action();
 
   c = strchr (++buf, ',');
   if (c)
@@ -1282,7 +1283,7 @@ target_fileio_reset (void)
 
 
 void
-target_fileio_request (char *buf, struct file_io_operations *operations)
+target_fileio_request (char *buf, struct memory_operations *operations)
 {
   struct request_args args = {buf, operations};
   int ex;

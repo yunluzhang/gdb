@@ -1,6 +1,6 @@
 /* Target dependent code for ARC processor family, for GDB, the GNU debugger.
 
-   Copyright 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2009 Free Software Foundation, Inc.
 
    Contributed by ARC International (www.arc.com)
 
@@ -11,7 +11,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -20,7 +20,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 /******************************************************************************/
 /*                                                                            */
@@ -41,8 +43,8 @@
 /*                                                                            */
 /******************************************************************************/
 
-#ifndef ARC_JTAG_ACTIONPOINTS_H
-#define ARC_JTAG_ACTIONPOINTS_H
+#ifndef ARC_ACTIONPOINTS_H
+#define ARC_ACTIONPOINTS_H
 
 /* gdb header files */
 #include "defs.h"
@@ -52,17 +54,21 @@
 #include "arc-support.h"
 
 
-Boolean arc_initialize_actionpoint_ops (struct target_ops *debug_ops);
-
-Boolean arc_restore_actionpoints_after_reset (void);
-
-void arc_target_halted (void);
-
-void arc_display_actionpoints (void);
+#define SUCCESS          0
+#define FAILURE        (-1)
 
 
-/* For debugging.  */
-void arc_dump_actionpoints (const char *message);
+Boolean arc_initialize_actionpoint_ops(struct target_ops* debug_ops);
 
-#endif /* ARC_JTAG_ACTIONPOINTS_H */
+Boolean arc_restore_actionpoints_after_reset(void);
+
+void arc_target_halted(void);
+
+void arc_display_actionpoints(void);
+
+
+// for debugging
+void arc_dump_actionpoints(const char* message);
+
+#endif /* ARC_ACTIONPOINTS_H */
 /******************************************************************************/

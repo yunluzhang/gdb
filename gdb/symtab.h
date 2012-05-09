@@ -574,7 +574,6 @@ struct symbol_ops
   struct value *(*read_variable) (struct symbol * symbol,
 				  struct frame_info * frame);
 
-// begin ARC
   /* Return the address of the variable SYMBOL, relative to the stack
      frame FRAME.  If the variable has been optimized out, return
      zero.
@@ -592,7 +591,6 @@ struct symbol_ops
 
   unsigned int (*get_variable_size) (struct symbol * symbol,
                                      struct frame_info * frame);
-// end ARC
 
   /* Return non-zero if we need a frame to find the value of the SYMBOL.  */
   int (*read_needs_frame) (struct symbol * symbol);

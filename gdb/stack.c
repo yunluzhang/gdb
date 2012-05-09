@@ -832,7 +832,6 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
     int i;
     for (i = 0; i < numargs; i++)
       addrs[i] = value_as_address (args[i]);  // ARC BUG FIX  29/9/08
-                                              // see http://sourceware.org/ml/gdb-patches/2009-01/msg00476.html
   }
 
   /* Assume that the single arg[0] is an address, use that to identify
@@ -906,7 +905,7 @@ frame_info (char *addr_exp, int from_tty)
    * We should not try to submit this fix to the FSF until we know that it
    * is generally valid.
    *
-   * gdb bug: 9458
+   * gdb bug: 2353
    * ARC bug: 95315
    */
   pc = get_frame_pc (fi);

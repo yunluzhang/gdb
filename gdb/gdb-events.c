@@ -122,7 +122,6 @@ architecture_changed_event (void)
   current_event_hooks->architecture_changed ();
 }
 
-// begin ARC
 void
 reg_architecture_changed_event (void)
 {
@@ -132,7 +131,6 @@ reg_architecture_changed_event (void)
     return;
   current_event_hooks->reg_architecture_changed ();
 }
-// end ARC
 
 struct gdb_events *
 deprecated_set_gdb_event_hooks (struct gdb_events *vector)
@@ -160,9 +158,7 @@ enum gdb_event
   tracepoint_delete,
   tracepoint_modify,
   architecture_changed,
-// begin ARC
   reg_architecture_changed,
-// end ARC
   nr_gdb_events
 };
 
@@ -286,7 +282,6 @@ queue_architecture_changed (void)
   append (event);
 }
 
-// begin ARC
 static void
 queue_reg_architecture_changed (void)
 {
@@ -294,7 +289,6 @@ queue_reg_architecture_changed (void)
   event->type = reg_architecture_changed;
   append (event);
 }
-// end ARC
 
 void
 gdb_events_deliver (struct gdb_events *vector)
@@ -344,11 +338,9 @@ gdb_events_deliver (struct gdb_events *vector)
 	case architecture_changed:
 	  vector->architecture_changed ();
 	  break;
-// begin ARC
 	case reg_architecture_changed:
 	  vector->reg_architecture_changed ();
 	  break;
-// end ARC
 	}
       delivering_events = event->next;
       xfree (event);
@@ -367,9 +359,7 @@ _initialize_gdb_events (void)
   queue_event_hooks.tracepoint_delete = queue_tracepoint_delete;
   queue_event_hooks.tracepoint_modify = queue_tracepoint_modify;
   queue_event_hooks.architecture_changed = queue_architecture_changed;
-// begin ARC
   queue_event_hooks.reg_architecture_changed = queue_reg_architecture_changed;
-// end ARC
 
   add_setshow_zinteger_cmd ("event", class_maintenance,
 			    &gdb_events_debug, _("\

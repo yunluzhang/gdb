@@ -782,7 +782,7 @@ static void fixup_partial_die (struct partial_die_info *,
 			       struct dwarf2_cu *);
 
 static gdb_byte *read_full_die (struct die_info **, bfd *, gdb_byte *,
-                                struct dwarf2_cu *, int *, unsigned int);
+                                struct dwarf2_cu *, int *);
 
 static gdb_byte *read_attribute (struct attribute *, struct attr_abbrev *,
                                  bfd *, gdb_byte *, struct dwarf2_cu *);
@@ -955,14 +955,12 @@ static struct die_info *read_comp_unit (gdb_byte *, bfd *, struct dwarf2_cu *);
 static struct die_info *read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
 					       struct dwarf2_cu *,
 					       gdb_byte **new_info_ptr,
-					       struct die_info *parent,
-					       unsigned int dwarf2_sibling_offset);
+					       struct die_info *parent);
 
 static struct die_info *read_die_and_siblings (gdb_byte *info_ptr, bfd *abfd,
 					       struct dwarf2_cu *,
 					       gdb_byte **new_info_ptr,
-					       struct die_info *parent,
-					       unsigned int dwarf2_sibling_offset);
+					       struct die_info *parent);
 
 static void free_die_list (struct die_info *);
 
@@ -5136,7 +5134,7 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
 static struct die_info *
 read_comp_unit (gdb_byte *info_ptr, bfd *abfd, struct dwarf2_cu *cu)
 {
-  return read_die_and_children (info_ptr, abfd, cu, &info_ptr, NULL, 0);
+  return read_die_and_children (info_ptr, abfd, cu, &info_ptr, NULL);
 }
 
 /* Read a single die and all its descendents.  Set the die's sibling
@@ -5149,21 +5147,19 @@ static struct die_info *
 read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
 		       struct dwarf2_cu *cu,
 		       gdb_byte **new_info_ptr,
-		       struct die_info *parent,
-		       unsigned int dwarf2_last_sibling_offset)
+		       struct die_info *parent)
 {
   struct die_info *die;
   gdb_byte *cur_ptr;
   int has_children;
 
-  cur_ptr = read_full_die (&die, abfd, info_ptr, cu, &has_children,
-			   dwarf2_last_sibling_offset);
+  cur_ptr = read_full_die (&die, abfd, info_ptr, cu, &has_children);
   store_in_ref_table (die->offset, die, cu);
 
   if (has_children)
     {
-      die->child = read_die_and_siblings (cur_ptr, abfd, cu, new_info_ptr,
-					  die, dwarf2_last_sibling_offset);
+      die->child = read_die_and_siblings (cur_ptr, abfd, cu,
+					  new_info_ptr, die);
     }
   else
     {
@@ -5184,11 +5180,9 @@ static struct die_info *
 read_die_and_siblings (gdb_byte *info_ptr, bfd *abfd,
 		       struct dwarf2_cu *cu,
 		       gdb_byte **new_info_ptr,
-		       struct die_info *parent,
-		       unsigned int dwarf2_last_sibling_offset)
+		       struct die_info *parent)
 {
   struct die_info *first_die, *last_sibling;
-  struct attribute *attr = NULL;
   gdb_byte *cur_ptr;
 
   cur_ptr = info_ptr;
@@ -5197,23 +5191,8 @@ read_die_and_siblings (gdb_byte *info_ptr, bfd *abfd,
   while (1)
     {
       struct die_info *die
-	= read_die_and_children (cur_ptr, abfd, cu, &cur_ptr, parent,
-				 dwarf2_last_sibling_offset);
-      int ctr;
+	= read_die_and_children (cur_ptr, abfd, cu, &cur_ptr, parent);
 
-      /* Ramana. Workaround for Metaware compiler bug. We don't
-	 use dwarf2_attr here because that follows DW_AT_specification
-	 and creates issues for us here.We just need to find 
-         the offset of the sibling for this DIE.  */
-
-      for (ctr=0; ctr < die->num_attrs ;ctr ++)
-	{
-	  if (die->attrs[ctr].name == DW_AT_sibling)
-	    {
-	      dwarf2_last_sibling_offset = die->attrs[ctr].u.addr;
-	      break;
-	    }
-	}
       if (!first_die)
 	{
 	  first_die = die;
@@ -5939,22 +5918,13 @@ fixup_partial_die (struct partial_die_info *part_die,
 
 static gdb_byte *
 read_full_die (struct die_info **diep, bfd *abfd, gdb_byte *info_ptr,
-	       struct dwarf2_cu *cu, int *has_children,
-	       unsigned int dwarf2_last_sibling_offset)
+	       struct dwarf2_cu *cu, int *has_children)
 {
   unsigned int abbrev_number, bytes_read, i, offset;
   struct abbrev_info *abbrev;
   struct die_info *die;
 
   offset = info_ptr - dwarf2_per_objfile->info_buffer;
-
-  /* The Metaware Compiler inserts a padding die in the middle
-     of the debug info.  Ignore this till it is corrected. */
-  if (dwarf2_last_sibling_offset && (offset < dwarf2_last_sibling_offset))
-    {
-      info_ptr += (dwarf2_last_sibling_offset - offset);
-      offset = dwarf2_last_sibling_offset;
-    }
   abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
   if (!abbrev_number)

@@ -68,6 +68,7 @@ CFILES = \
 	arc-ibld.c \
 	arc-opc.c \
 	arc-opinst.c \
+	arc-opc-cgen.c \
 	arc-ext.c \
 	arm-dis.c \
 	avr-dis.c \
@@ -227,6 +228,7 @@ ALL_MACHINES = \
 	arc-ibld.lo \
 	arc-opinst.lo \
 	arc-opc.lo \
+	arc-opc-cgen.lo \
 	arc-ext.lo \
 	arm-dis.lo \
 	avr-dis.lo \
@@ -713,6 +715,11 @@ arc-ibld.lo: arc-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h arc-desc.h $(INCDIR)/opcode/cgen-bitset.h \
   $(INCDIR)/opcode/cgen.h $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h \
   arc-opc.h opintl.h $(INCDIR)/safe-ctype.h
+arc-opc-cgen.lo: arc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
+  arc-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
+  $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h arc-opc.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h
 arc-opinst.lo: arc-opinst.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
   arc-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \

@@ -1,27 +1,29 @@
 /* Target dependent code for ARC processor family, for GDB, the GNU debugger.
 
-   Copyright 2005, 2008 Free Software Foundation, Inc.
+   Copyright 2005 Free Software Foundation, Inc.
 
    Contributed by Codito Technologies Pvt. Ltd. (www.codito.com)
 
-   Authors:
-      Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
+   Authors: 
+      Ramana Radhakrishnan <ramana.radhakrishnan@codito.com> 
       Richard Stuckey      <richard.stuckey@arc.com>
 
    This file is part of GDB.
-
+   
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+*/
 
 /******************************************************************************/
 /*                                                                            */
@@ -39,18 +41,18 @@
 #error This file is no longer used
 #endif
 
-/* Auxiliary Registers.  */
+/* Auxiliary Registers */
 
 #ifdef RAUX
 
 RAUX ( STATUS,               0x0,   "Status (obsolete)",                          ARC_STATUS_REGNUM,                      0xFEFFFFFF,   RO,   ARCompact )
-RAUX ( SEMAPHORE,            0x1,   "Semaphore",                                  ARC_SEMAPHORE_REGNUM,                   0x0000000F,   RW,   ARCompact )
+RAUX ( SEMAPHORE,            0x1,   "Semaphore",                                  ARC_SEMAPHORE_REGNUM,                   0x0000000F,   RW,   ARCompact ) 
 RAUX ( LP_START,             0x2,   "Loop Start",                                 ARC_LP_START_REGNUM,                    0xFFFFFFFE,   RW,   ARCompact )
 RAUX ( LP_END,               0x3,   "Loop End",                                   ARC_LP_END_REGNUM,                      0xFFFFFFFE,   RW,   ARCompact )
 RAUX ( IDENTITY,             0x4,   "Identity",                                   ARC_IDENTITY_REGNUM,                    0xFFFFFFFF,   RO,   ARCompact )
 RAUX ( DEBUG,                0x5,   "Debug",                                      ARC_DEBUG_REGNUM,                       0xF0800802,   RO,   ARCompact )
 RAUX ( PC,                   0x6,   "PC",                                         ARC_PC_REGNUM,                          0xFFFFFFFE,   RO,   ARCompact )
-RAUX ( STATUS32,             0xA,   "STATUS32",                                   ARC_STATUS32_REGNUM,                    0x00001FFF,   RO,   ARCompact )
+RAUX ( STATUS32,             0xA,   "STATUS32",                                   ARC_STATUS32_REGNUM,                    0x00001FFF,   RO,   ARCompact ) 
 RAUX ( STATUS32_L1,          0xB,   "STATUS32 register in case of L1 interrupts", ARC_STATUS32_L1_REGNUM,                 0x00001FFE,   RW,   ARCompact )
 RAUX ( STATUS32_L2,          0xC,   "STATUS32 register in case of L2 interrupts", ARC_STATUS32_L2_REGNUM,                 0x00001FFE,   RW,   ARCompact )
 RAUX ( COUNT0,               0x21,  "Processor Timer 1 Count Value",              ARC_COUNT0_REGNUM,                      0xFFFFFFFF,   RW,   ARCompact )
@@ -74,7 +76,7 @@ RAUX ( ICAUSE2,              0x40B, "Interrupt Cause (Level 2)",                
 RAUX ( AUX_IENABLE,          0x40C, "Interrupt Mask Programming",                 ARC_AUX_IENABLE_REGNUM,                 0xFFFFFFF8,   RW,   ARC700    )
 RAUX ( AUX_ITRIGGER,         0x40D, "Interrupt Sensitivity Programming",          ARC_AUX_ITRIGGER_REGNUM,                0xFFFFFFF8,   RW,   ARC700    )
 RAUX ( XPU,                  0x410, "User Mode Extension Permissions",            ARC_XPU_REGNUM,                         0xFFFFFFFF,   RW,   ARC700    )
-RAUX ( BTA,                  0x412, "Branch Target Address",                      ARC_BTA_REGNUM,                         0xFFFFFFFE,   RO,   ARC700    )
+RAUX ( BTA,                  0x412, "Branch Target Address",                      ARC_BTA_REGNUM,                         0xFFFFFFFE,   RO,   ARC700    )  // is this R-O ?
 RAUX ( BTA_L1,               0x413, "Branch Target Address in Level 1",           ARC_BTA_L1_REGNUM,                      0xFFFFFFFE,   RW,   ARC700    )
 RAUX ( BTA_L2,               0x414, "Branch Target Address in Level 2",           ARC_BTA_L2_REGNUM,                      0xFFFFFFFE,   RW,   ARC700    )
 RAUX ( AUX_IRQ_PULSE_CANCEL, 0x415, "Interrupt Pulse Cancel",                     ARC_AUX_IRQ_PULSE_CANCEL_REGNUM,        0xFFFFFFFA,   WO,   ARC700    )
@@ -83,7 +85,7 @@ RAUX ( AUX_IRQ_PENDING,      0x416, "Interrupt Pending Register",               
 #endif // RAUX
 
 
-/* Build Configuration Registers.  */
+/* Build Configuration Registers */
 
 #ifdef RBCR
 
@@ -95,8 +97,8 @@ RBCR ( DVBF_BUILD,           0x64,  "BCR for Dual Viterbi Instruction",         
 RBCR ( TEL_INSTR_BUILD,      0x65,  "BCR for Extended Arithmetic Instructions",          ARC_BCR_5_REGNUM,                0xFFFFFFFF,   RO,   ARCompact )
 RBCR ( UNUSED_6,             0x66,  "unused",                                            ARC_BCR_6_REGNUM,                0xFFFFFFFF,   UU,   ARCompact )
 RBCR ( MEMSUBSYS,            0x67,  "BCR for Memory Subsystem",                          ARC_BCR_7_REGNUM,                0xFFFFFFFF,   RO,   ARCompact )
-RBCR ( VECBASE_AC_BUILD,     0x68,  "BCR for Interrupt Vector Base",                     ARC_BCR_8_REGNUM,                0xFFFFFFFF,   RO,   ARCompact )
-RBCR ( P_BASE_ADDRESS,       0x69,  "Peripheral Base Address",                           ARC_BCR_9_REGNUM,                0xFFFFFFFF,   RO,   ARCompact )
+RBCR ( VECBASE_AC_BUILD,     0x68,  "BCR for Interrupt Vector Base",                     ARC_BCR_8_REGNUM,                0xFFFFFFFF,   RO,   ARCompact ) 
+RBCR ( P_BASE_ADDRESS,       0x69,  "Peripheral Base Address",                           ARC_BCR_9_REGNUM,                0xFFFFFFFF,   RO,   ARCompact ) 
 RBCR ( UNUSED_A,             0x6A,  "unused",                                            ARC_BCR_A_REGNUM,                0xFFFFFFFF,   UU,   ARCompact )
 RBCR ( UNUSED_B,             0x6B,  "unused",                                            ARC_BCR_B_REGNUM,                0xFFFFFFFF,   UU,   ARCompact )
 RBCR ( UNUSED_C,             0x6C,  "unused",                                            ARC_BCR_C_REGNUM,                0xFFFFFFFF,   UU,   ARCompact )
@@ -118,8 +120,8 @@ RBCR ( MULTIPLY_BUILD,       0x7B,  "(32 X 32) Multiply Unit Build",            
 RBCR ( SWAP_BUILD,           0x7C,  "SWAP Build",                                        ARC_BCR_1C_REGNUM,               0xFFFFFFFF,   RO,   ARCompact )
 RBCR ( NORM_BUILD,           0x7D,  "NORM Unit Build",                                   ARC_BCR_1D_REGNUM,               0xFFFFFFFF,   RO,   ARCompact )
 RBCR ( MINMAX_BUILD,         0x7E,  "Minmax Unit Build",                                 ARC_BCR_1E_REGNUM,               0xFFFFFFFF,   RO,   ARCompact )
-RBCR ( BARREL_BUILD,         0x7F,  "Barrel Shifter Build",                              ARC_BCR_1F_REGNUM,               0xFFFFFFFF,   RO,   ARCompact )
+RBCR ( BARREL_BUILD,         0x7F,  "Barrel Shifter Build",                              ARC_BCR_1F_REGNUM,               0xFFFFFFFF,   RO,   ARCompact ) 
 
-#endif // RBCR
+#endif // RBCR 
 
 /******************************************************************************/

@@ -1,6 +1,6 @@
 /* Target dependent code for ARC processor family, for GDB, the GNU debugger.
 
-   Copyright 2005, 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2005 Free Software Foundation, Inc.
 
    Contributed by Codito Technologies Pvt. Ltd. (www.codito.com)
 
@@ -12,7 +12,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -21,7 +21,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 /******************************************************************************/
 /*                                                                            */
@@ -38,14 +40,26 @@
 #include "arc-support.h"
 
 
-/* Operations for reading/writing core/auxiliary registers; these must be used
-   when access to the registers *specifically* via the JTAG i/f is required.
+typedef enum
+{
+    CLEAR_USER_BIT,
+    RESTORE_USER_BIT
+} ARC_Status32Action;
 
-   N.B. the register contents returned by these functions, or supplied to them,
-        are in host byte order.  */
+
+void _initialize_arc_debug(void);
+
+
+/* operation for clearing/restoring the User bit in the STATUS32 register */
+void arc_change_status32(ARC_Status32Action action);
+
+
+/* operations for reading/writing core/auxiliary registers; these must be used
+ * when access to the registers *specifically* via the JTAG i/f is required
+ */
 
 Boolean arc_read_jtag_core_register  (ARC_RegisterNumber    hw_regno,
-                                      ARC_RegisterContents *contents,
+                                      ARC_RegisterContents* contents,
                                       Boolean               warn_on_failure);
 
 Boolean arc_write_jtag_core_register (ARC_RegisterNumber    hw_regno,
@@ -53,7 +67,7 @@ Boolean arc_write_jtag_core_register (ARC_RegisterNumber    hw_regno,
                                       Boolean               warn_on_failure);
 
 Boolean arc_read_jtag_aux_register   (ARC_RegisterNumber    hw_regno,
-                                      ARC_RegisterContents *contents,
+                                      ARC_RegisterContents* contents,
                                       Boolean               warn_on_failure);
 
 Boolean arc_write_jtag_aux_register  (ARC_RegisterNumber    hw_regno,

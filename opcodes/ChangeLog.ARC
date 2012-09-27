@@ -1,3 +1,8 @@
+2012-09-27  Simon Cook  <simon.cook@embecosm.com>
+
+	* arcompact-dis.c (dsmOneArcInst): Added disassembler
+	support for MPY, MPYH, MPYHU, MPYU instructions.
+
 2012-06-05  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* arcompact-dis.c (my_sprintf): Don't abort for "%*".
